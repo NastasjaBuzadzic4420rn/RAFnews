@@ -30,9 +30,7 @@ export default {
         }
     },
     created() {
-        this.$axios.get("/api/users/" + this.article.creatorId).then(response => {
-            this.author = response.data.firstName + " " + response.data.lastName ;
-        });
+       this.fetchArticles();
     },
     props: {
         article: {
@@ -50,19 +48,20 @@ export default {
         },
     },
     methods: {
-        deleteArticle(id){
-            this.deleteComments(id);
-            this.$axios.delete('/api/article/' + id)
-                .then((response) => {
-                    console.log(response);
-                    this.$router.push({name: 'News'});
-                })
+        fetchArticles(){
+            this.$axios.get("/api/users/" + this.article.creatorId).then(response => {
+                this.author = response.data.firstName + " " + response.data.lastName ;
+            });
         },
-        deleteComments(id){
+        deleteArticle(id){
             this.$axios.delete('/api/comments/fromArticle/' + id)
                 .then((response) => {
                     console.log(response);
-                    this.$router.push({name: 'News'});
+                    this.$axios.delete('/api/articles/' + id)
+                        .then((response) => {
+                            console.log(response);
+                            this.fetchArticles();
+                        })
                 })
         },
         openArticle(){

@@ -79,10 +79,10 @@ export default {
                     }).then((r) => {
                         this.$router.push({name: 'News'});
                     }).catch(error => {
-                        console.error('Error:', error);
+                        console.error('Error2:', error);
                     })
                 }).catch(error => {
-                    console.error('Error:', error);
+                    console.error('Error1:', error);
                     // this.$router.push({name: 'News'});
                 })
         }

@@ -36,7 +36,7 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/EditCategory.vue')
   },
   {
-    path: '/news/:id',
+    path: '/news',
     name: 'News',
     meta: {
       authRequired: true,
@@ -60,9 +60,43 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/EditArticle.vue')
   },
   {
+    path: '/users',
+    name: 'Users',
+    meta: {
+      authRequired: true,
+    },
+    component: () => import(/* webpackChunkName: "about" */ '../views/Users.vue')
+  },
+  {
+    path: '/addUser',
+    name: 'AddUser',
+    meta: {
+      authRequired: true,
+    },
+    component: () => import(/* webpackChunkName: "about" */ '../views/AddUser.vue')
+  },
+  {
+    path: '/editUser/:id',
+    name: 'EditUser',
+    meta: {
+      authRequired: true,
+    },
+    component: () => import(/* webpackChunkName: "about" */ '../views/EditUser.vue')
+  },
+  {
     path: '/login',
     name: 'Login',
     component: () => import(/* webpackChunkName: "about" */ '../views/Login.vue')
+  },
+  {
+    path: '/mostPopular',
+    name: 'MostPopular',
+    component: () => import(/* webpackChunkName: "about" */ '../views/MostPopular.vue')
+  },
+  {
+    path: '/readNews',
+    name: 'ReadNews',
+    component: () => import(/* webpackChunkName: "about" */ '../views/ReadNews.vue')
   }
 ]
 
