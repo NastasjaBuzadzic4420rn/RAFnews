@@ -31,6 +31,18 @@
                 <input v-model="password2" type="text" class="form-control" id="password2"  required>
             </div>
 
+            <div v-if="confirmPassword" class="alert alert-danger" role="alert">
+                Passwords are not matching.
+            </div>
+
+            <div v-if="invalidInput" class="alert alert-danger" role="alert">
+                Invalid input. Fields first name, last name, email, user type and password are required.
+            </div>
+
+            <div v-if="emailExists" class="alert alert-danger" role="alert">
+                Email already exists.
+            </div>
+
             <button type="submit" class="btn btn-success">Submit</button>
         </form>
     </div>
@@ -52,7 +64,10 @@ export default {
                 active: null,
                 password: null
             },
-            selectedType: null
+            selectedType: null,
+            invalidInput: false,
+            confirmPassword: false,
+            emailExists: false
         }
     },
     created() {
@@ -74,13 +89,28 @@ export default {
     },
     methods: {
         editUser(){
-            if(this.password1 && this.password1 === this.password2){
-                this.editedUser.password = this.password1;
-                this.$axios.put('/api/users/'+this.userId, this.editedUser)
-                    // eslint-disable-next-line no-unused-vars
-                    .then(respond => {
-                        this.$router.push({name: 'Users'});
+            if (this.newUser.firstName && this.newUser.lastName && this.newUser.email && this.selectedType && this.password1) {
+                if (this.password1 && this.password1 === this.password2) {
+                    this.editedUser.password = this.password1;
+                    this.$axios.put('/api/users/authA/' + this.userId, this.editedUser)
+                        .then(respond => {
+                            if(respond.data){
+                                this.$router.push({name: 'Users'});
+                                this.emailExists = false;
+                            } else {
+                                this.emailExists = true;
+                            }
+                        }).catch(error => {
+                            console.log(error);
+                            this.emailExists = true;
                     })
+                    this.confirmPassword = false;
+                } else {
+                    this.confirmPassword = true
+                }
+                this.invalidInput = false;
+            } else {
+                this.invalidInput = true;
             }
 
         }

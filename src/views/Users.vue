@@ -58,16 +58,15 @@ export default {
         }
     },
     created() {
-        this.fetchUsers();
+        this.$axios.get('/api/users/authA').then((response) => {
+            this.users = response.data;
+        }).catch(error =>{
+            console.log(error);
+        });
     },
     methods: {
-        fetchUsers(){
-            this.$axios.get('/api/users').then((response) => {
-                this.users = response.data;
-            });
-        },
         deactivateUser(id){
-            this.$axios.put('/api/users/activation/' + id)
+            this.$axios.put('/api/users/authA/activation/' + id)
                 .then((response) => {
                     console.log(response);
                     this.fetchUsers();

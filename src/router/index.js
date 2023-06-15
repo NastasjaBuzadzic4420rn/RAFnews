@@ -11,14 +11,6 @@ const routes = [
     component: HomeView
   },
   {
-    path: '/users',
-    name: 'Users',
-    meta: {
-      authRequired: true,
-    },
-    component: () => import(/* webpackChunkName: "about" */ '../views/Users.vue')
-  },
-  {
     path: '/categories',
     name: 'Categories',
     meta: {
@@ -44,6 +36,14 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/News.vue')
   },
   {
+    path: '/newsInCategory/:id',
+    name: 'NewsInCategory',
+    meta: {
+      authRequired: true,
+    },
+    component: () => import(/* webpackChunkName: "about" */ '../views/NewsInCategory.vue')
+  },
+  {
     path: '/addArticle',
     name: 'AddArticle',
     meta: {
@@ -64,6 +64,7 @@ const routes = [
     name: 'Users',
     meta: {
       authRequired: true,
+      onlyAdmin: true
     },
     component: () => import(/* webpackChunkName: "about" */ '../views/Users.vue')
   },
@@ -72,6 +73,7 @@ const routes = [
     name: 'AddUser',
     meta: {
       authRequired: true,
+      onlyAdmin: true
     },
     component: () => import(/* webpackChunkName: "about" */ '../views/AddUser.vue')
   },
@@ -80,6 +82,7 @@ const routes = [
     name: 'EditUser',
     meta: {
       authRequired: true,
+      onlyAdmin: true
     },
     component: () => import(/* webpackChunkName: "about" */ '../views/EditUser.vue')
   },
@@ -97,6 +100,16 @@ const routes = [
     path: '/readNews',
     name: 'ReadNews',
     component: () => import(/* webpackChunkName: "about" */ '../views/ReadNews.vue')
+  },
+  {
+    path: '/detailArticle/:id',
+    name: 'DetailArticle',
+    component: () => import(/* webpackChunkName: "about" */ '../views/DetailArticle.vue')
+  },
+  {
+    path: '/tagFilter/:id',
+    name: 'TagFilterNews',
+    component: () => import(/* webpackChunkName: "about" */ '../views/TagFilterNews.vue')
   }
 ]
 
@@ -116,6 +129,27 @@ router.beforeEach((to, from, next) => {
     const payload = JSON.parse(atob(jwt.split('.')[1]));
     const expDate = new Date(payload.exp * 1000);
     if (expDate < new Date()) {
+      next({name: 'Login'});
+      return;
+    }
+  }
+
+  if (to.meta.onlyAdmin) {
+    const jwt = localStorage.getItem('jwt');
+
+    if (!jwt) {
+      next({name: 'Login'});
+      return;
+    }
+
+    const payload = JSON.parse(atob(jwt.split('.')[1]));
+    const expDate = new Date(payload.exp * 1000);
+    if (expDate < new Date()) {
+      next({name: 'Login'});
+      return;
+    }
+
+    if(payload.user_type != "ADMIN"){
       next({name: 'Login'});
       return;
     }

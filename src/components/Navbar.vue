@@ -5,19 +5,19 @@
           <router-link to="/" tag="a" class="navbar-brand" :class="{active: this.$router.currentRoute.name === 'HomeView'}">{{ user_name }}</router-link>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li v-if="isLoggedin" class="nav-item">
+              <li v-if="!isLoggedin" class="nav-item">
                   <router-link :to="{name: 'MostPopular'}" tag="a" class="nav-link" :class="{active: this.$router.currentRoute.name === 'MostPopular'}">Most popular</router-link>
               </li>
-              <li v-if="isLoggedin" class="nav-item">
+              <li v-if="!isLoggedin" class="nav-item">
                   <router-link :to="{name: 'ReadNews'}" tag="a" class="nav-link" :class="{active: this.$router.currentRoute.name === 'ReadNews'}">News</router-link>
               </li>
-              <li v-if="!isLoggedin" class="nav-item">
+              <li v-if="isLoggedin" class="nav-item">
                   <router-link :to="{name: 'Categories'}" tag="a" class="nav-link" :class="{active: this.$router.currentRoute.name === 'Categories'}">Categories</router-link>
               </li>
-              <li v-if="!isLoggedin" class="nav-item">
+              <li v-if="isLoggedin" class="nav-item">
                   <router-link :to="{name: 'News'}" tag="a" class="nav-link" :class="{active: this.$router.currentRoute.name === 'News'}">News</router-link>
               </li>
-             <li v-if="isAdmin" class="nav-item">
+             <li v-if="isLoggedin && isAdmin" class="nav-item">
                <router-link :to="{name: 'Users'}" tag="a" class="nav-link" :class="{active: this.$router.currentRoute.name === 'Users'}">Users</router-link>
              </li>
           </ul>
@@ -43,16 +43,16 @@ export default {
             user_name: null,
             user_id: null,
             isLoggedin: null,
-            isAdmin: null
+            // isAdmin: null
         }
     },
     created() {
         this.getUser();
-        if(this.user_id === "ADMIN"){
-            this.isAdmin = true;
-        } else {
-            this.isAdmin = false;
-        }
+        // if(this.user_id === "ADMIN"){
+        //     this.isAdmin = true;
+        // } else {
+        //     this.isAdmin = false;
+        // }
     },
     computed: {
         canLogout() {
@@ -73,7 +73,22 @@ export default {
                 return false;
             return true;
         },
+        isAdmin() {
+            const jwt = localStorage.getItem("jwt");
 
+            if (jwt) {
+                const payload = JSON.parse(atob(jwt.split(".")[1]));
+                const user_type = payload.user_type;
+
+                if (user_type === "ADMIN") {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        },
     },
     methods: {
         logout() {
@@ -88,16 +103,16 @@ export default {
             if(jwt) {
                 const payload = JSON.parse(atob(jwt.split('.')[1]));
                 this.user_id = payload.user_id;
-                this.$axios.get("/api/users/" + 1).then(response => {
+                //TODO: proveriti user_id
+                this.$axios.get("/api/users/" + this.user_id).then(response => {
                     this.user_name = response.data.firstName + " " + response.data.lastName;
                     console.log(response);
                 });
                 this.isLoggedin = true;
             } else {
                 this.user_name = "Home page";
-                this.isLoggedin = true;
+                this.isLoggedin = false;
             }
-
         },
     },
 }

@@ -10,6 +10,15 @@
                 <label for="description" class="form-label">Description</label>
                 <textarea id="description" v-model="editedCategory.description" class="form-control"></textarea>
             </div>
+
+            <div v-if="invalidInput" class="alert alert-danger" role="alert">
+                Invalid input. Fields name and description are required.
+            </div>
+
+            <div v-if="categoryExists" class="alert alert-danger" role="alert">
+                Category with the same name already exists.
+            </div>
+
             <button type="submit" class="btn btn-success">Update</button>
         </form>
     </div>
@@ -25,6 +34,8 @@ export default {
                 name: '',
                 description: ''
             },
+            invalidInput: false,
+            categoryExists: false
         }
     },
     created() {
@@ -36,14 +47,22 @@ export default {
     },
     methods: {
          updateCategory(){
-
-             this.$axios.put("/api/categories/" + this.categoryID, this.editedCategory).then(response => {
-                 console.log(response);
-                 this.$router.push({name: 'Categories'});
-             }).catch(error => {
-                 console.error('Error:', error);
-                 this.$router.push({name: 'Categories'});
-             });
+             if(this.newCategory.name && this.newCategory.description) {
+                 this.$axios.put("/api/categories/auth/" + this.categoryID, this.editedCategory).then(response => {
+                     if(response.data){
+                         this.$router.push({name: 'Categories'});
+                         this.categoryExists = false;
+                     } else {
+                         this.categoryExists = true;
+                     }
+                 }).catch(error => {
+                     console.error('Error:', error);
+                     this.categoryExists = true;
+                 });
+                 this.invalidInput = false;
+             } else {
+                 this.invalidInput = true;
+             }
          }
     }
 

@@ -21,6 +21,11 @@
                 <label for="text" class="form-label">Text</label>
                 <textarea id="text" v-model="editedArticle.text" class="form-control"></textarea>
             </div>
+
+            <div v-if="invalidInput" class="alert alert-danger" role="alert">
+                Invalid input. Fields title, category and text are required.
+            </div>
+
             <button type="submit" class="btn btn-success">Update</button>
         </form>
     </div>
@@ -40,6 +45,7 @@ export default {
             },
             selectedCategory: null,
             categories: [],
+            invalidInput: false,
         }
     },
     created() {
@@ -68,23 +74,28 @@ export default {
                 this.editedArticle.tags =  response.data.map(obj => obj.tag).join(', ');
             });
         },
-        updateArticle(){
-            this.$axios.put('/api/articles/' + this.articleId, this.editedArticle)
-                // eslint-disable-next-line no-unused-vars
-                .then(response => {
-                    this.$axios.put('/api/tags', {
-                        tags: this.editedArticle.tags,
-                        articleId: this.articleId
-                        // eslint-disable-next-line no-unused-vars
-                    }).then((r) => {
-                        this.$router.push({name: 'News'});
+        updateArticle() {
+            if (this.editedArticle.title && this.editedArticle.text && this.selectedCategory) {
+                this.$axios.put('/api/articles/auth/' + this.articleId, this.editedArticle)
+                    // eslint-disable-next-line no-unused-vars
+                    .then(response => {
+                        this.$axios.put('/api/tags/auth', {
+                            tags: this.editedArticle.tags,
+                            articleId: this.articleId
+                            // eslint-disable-next-line no-unused-vars
+                        }).then((r) => {
+                            this.$router.push({name: 'News'});
+                        }).catch(error => {
+                            console.error('Error2:', error);
+                        })
                     }).catch(error => {
-                        console.error('Error2:', error);
-                    })
-                }).catch(error => {
                     console.error('Error1:', error);
                     // this.$router.push({name: 'News'});
                 })
+                this.invalidInput = false;
+            } else {
+                this.invalidInput = true;
+            }
         }
     },
     watch: {

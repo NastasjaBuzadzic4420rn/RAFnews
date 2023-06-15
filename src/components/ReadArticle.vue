@@ -1,40 +1,38 @@
 <template>
-  <div>
-      <div v-if="exists" class="article-container border p-3">
-          <div class="article-container border p-3">
-              <div class="title-date-container" @click="openArticle">
-                  <h3 class="title" >{{ article.title }}</h3>
-                  <p class="date">{{ article.creationTime }}</p>
-              </div>
-          </div>
-          <p class="author">{{ author }}</p>
-          <p class="text">{{ article.text | shortText}}</p>
-          <div>
-              <p class="text">Read more</p>
-              <router-link :to="{ name: 'EditArticle', params: {id: article.id} }" tag="button" class="btn btn-success" :class="{ active: $route.name === 'EditArticle' }">
-                  Edit
-              </router-link>
-              <button class="btn btn-success" @click="deleteArticle(article.id)">Delete</button>
-          </div>
-      </div>
-  </div>
+    <div>
+        <div class="article-container border p-3">
+            <div class="article-container border p-3">
+                <div class="title-date-container" @click="openArticle">
+                    <h3 class="title" >{{ article.title }}</h3>
+<!--                    <router-link :to="{ name: 'DetailArticle', params: {id: article.id} }" tag="h3" class="title" :class="{ active: $route.name === 'DetailArticle' }">-->
+<!--                        {{ article.title }}-->
+<!--                    </router-link>-->
+                    <p class="date">{{ article.creationTime }}</p>
+                </div>
+            </div>
+            <p class="author">{{ category }}</p>
+            <p class="text">{{ article.text | shortText}}</p>
+            <div>
+                <p class="text">Read more</p>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
 export default {
-    // eslint-disable-next-line vue/multi-word-component-names
-    name: "Article",
+    name: "ReadArticle",
     data(){
         return{
-          author: null,
-            exists: true
+            category: null,
         }
     },
     created() {
-        this.$axios.get("/api/users/" + this.article.creatorId).then(response => {
-            this.author = response.data.firstName + " " + response.data.lastName;
-        }).catch(error => {
-            console.log("Error: " + error);
+        this.$axios.get("/api/categories/" + this.article.categoryId).then(response => {
+            this.category = response.data.name;
+            console.log(response.data);
+        }).catch(error =>{
+            console.log("Error: " + error)
         });
     },
     props: {
@@ -60,7 +58,7 @@ export default {
                     this.$axios.delete('/api/articles/auth/' + id)
                         .then((response) => {
                             console.log(response);
-                            this.exists = false;
+                            this.fetchArticles();
                         })
                 })
         },
@@ -72,6 +70,7 @@ export default {
 </script>
 
 <style scoped>
+
 .article-container {
     border: 1px solid #ddd;
     margin: 5px;
@@ -101,11 +100,5 @@ export default {
     align-items: center;
     justify-content: space-between;
 }
-
-button {
-    width: 100px;
-    margin: 5px;
-}
-
 
 </style>

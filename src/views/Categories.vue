@@ -15,7 +15,7 @@
                         <tbody>
                         <tr v-for="category in categories" :key="category.id" @click="selectedCategory = category">
                             <td>
-                                <router-link :to="{ name: 'newsInCategory', params: {id: category.id} }" tag="a" class="category-link" :class="{ active: $route.name === 'newsInCategory' }">
+                                <router-link :to="{ name: 'NewsInCategory', params: {id: category.id} }" tag="a" class="category-link" :class="{ active: $route.name === 'NewsInCategory' }">
                                     {{ category.name }}
                                 </router-link>
                             </td>
@@ -41,6 +41,15 @@
                             <label for="description" class="form-label">Description</label>
                             <textarea id="description" v-model="newCategory.description" class="form-control"></textarea>
                         </div>
+
+                        <div v-if="invalidInput" class="alert alert-danger" role="alert">
+                            Invalid input. Fields name and description are required.
+                        </div>
+
+                        <div v-if="categoryExists" class="alert alert-danger" role="alert">
+                            Category with the same name already exists.
+                        </div>
+
                         <button type="submit" class="btn btn-success">Add</button>
                     </form>
                 </div>
@@ -60,7 +69,9 @@ export default {
             newCategory: {
                 name: '',
                 description: ''
-            }
+            },
+            invalidInput: false,
+            categoryExists: false
         }
     },
     created() {
@@ -73,29 +84,42 @@ export default {
             });
         },
         addCategory() {
-            const newCategory = {
-                name: this.newCategory.name,
-                description: this.newCategory.description
-            };
+            if(this.newCategory.name && this.newCategory.description) {
+                const newCategory = {
+                    name: this.newCategory.name,
+                    description: this.newCategory.description
+                };
 
-            this.$axios.post('/api/categories', newCategory)
-                .then((response) => {
-                    this.categories = response.data;
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+                this.$axios.post('/api/categories/auth', newCategory)
+                    .then((response) => {
+                        if(response.data){
+                            this.newCategory.name = '';
+                            this.newCategory.description = '';
+                            this.fetchCategories();
+                            this.categoryExists = false;
 
-            this.newCategory.name = '';
-            this.newCategory.description = '';
-            this.fetchCategories();
+                        } else {
+                            this.categoryExists = true;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:' + error);
+                        this.categoryExists = true;
+                    });
+                this.invalidInput = false;
+            } else {
+                this.invalidInput = true;
+            }
         },
         deleteCategory(id){
-            this.$axios.delete('/api/categories/' + id)
+            this.$axios.delete('/api/categories/auth/' + id)
                 .then((response) => {
-                    console.log(response);
+                    console.log(response.data);
                     this.fetchCategories();
-                })
+                }).catch(error => {
+                    console.log("Greska: " + error)
+            })
+
         }
     }
 }

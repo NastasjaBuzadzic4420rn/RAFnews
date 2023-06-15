@@ -21,6 +21,11 @@
             <div class="mb-3">
                 <label for="text" class="form-label">Text</label>
                 <textarea v-model="newArticle.text" class="form-control" id="text" rows="5" placeholder="Enter text" required></textarea>
+
+
+                <div v-if="invalidInput" class="alert alert-danger" role="alert">
+                    Invalid input. Fields title, category and text are required.
+                </div>
             </div>
             <button type="submit" class="btn btn-success">Submit</button>
         </form>
@@ -40,7 +45,8 @@ export default {
             },
             categories: [],
             selectedCategory: '',
-            tags: null
+            tags: null,
+            invalidInput: false
         }
     },
     created() {
@@ -70,27 +76,35 @@ export default {
             });
         },
         addArticle(){
-            this.$axios.post('/api/articles', this.newArticle)
-                .then((response) => {
-                    this.newArticle.title = '';
-                    this.newArticle.text = '';
-                    this.$axios.post('/api/tags/addTo', {
-                        tags: this.tags,
-                        articleId: response.data.id
-                    }).then((r) => {
-                        this.$router.push({name: 'News'});
-                        console.log(r);
+            if(this.newArticle.title && this.newArticle.text && this.selectedCategory) {
+                this.$axios.post('/api/articles/auth', this.newArticle)
+                    .then((response) => {
+                        this.newArticle.title = '';
+                        this.newArticle.text = '';
+                        this.$axios.post('/api/tags/auth/addTo', {
+                            tags: this.tags,
+                            articleId: response.data.id
+                        }).then((r) => {
+                            this.$router.push({name: 'News'});
+                            console.log(r);
+                        })
                     })
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    // this.$router.push({name: 'News'});
-                })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // this.$router.push({name: 'News'});
+                    })
+                this.invalidInput = false;
+            } else {
+                this.invalidInput = true;
+            }
         }
     }
 }
 </script>
 
 <style scoped>
+.small {
+    font-size: 0.8rem; /* Adjust the font size as desired */
+}
 
 </style>
